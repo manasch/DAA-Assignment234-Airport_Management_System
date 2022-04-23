@@ -1,13 +1,48 @@
 #include "header.h"
+#include <stdlib.h>
+#include <limits.h>
 
 // ANY STATIC FUNCTIONS ARE UP HERE
 
+// dfs q1 helper function
+static void q1_helper(int v, int n, int *visited, const connection_t (*conn)[n])
+{
+    visited[v] = 1;
+    for (int i = 0; i < n; i++)
+    {
+        if (v != i && conn[v][i].distance != INT_MAX && visited[i] == 0)
+            q1_helper(i, n, visited, conn);
+    }
+}
 
 // YOUR SOLUTIONS BELOW
 
 int q1(int n, const connection_t connections[n][n])
 {
-    return 0;
+    int *visited = (int *) malloc(n * sizeof(int));
+
+    /*
+        Iterating through each vertex to see if it can visit every other vertex
+        Performing a DFS for each vertex will tell whether every other vertex
+        can be reached or not.
+    */
+    for (int v = 0; v < n; v++)
+    {
+        // Initializing the visited array everytime
+        for (int i = 0; i < n; i++)
+            visited[i] = 0;
+        
+        q1_helper(v, n, visited, connections);
+        // Checking if all the vertices have been visited
+        for (int i = 0; i < n; i++)
+        {
+            if (visited[i] == 0)
+                return 0;
+        }
+    }
+
+    free(visited);
+    return 1;
 }
 
 int q2(const airport_t *src, const airport_t *dest, int n, int k,

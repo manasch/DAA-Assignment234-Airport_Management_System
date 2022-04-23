@@ -3,3 +3,8 @@
 *.docx
 *.xls
 *.xlsx
+
+# Output files
+*.o
+*.exe
+*.out
