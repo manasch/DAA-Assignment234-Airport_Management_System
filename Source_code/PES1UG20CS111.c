@@ -15,6 +15,31 @@ static void q1_helper(int v, int n, int *visited, const connection_t (*conn)[n])
     }
 }
 
+static int q2_helper(const int src, const int dst, int n,
+                     int count, const connection_t (*conn)[n], int *visited)
+{
+    visited[src] = 1;
+    if (src == dst)
+    {
+        if (count >= 0)
+            return 1;
+        // When you have reached the destination but took flights than required
+        return 0;
+    }
+
+    for (int v = 0; v < n; v++)
+    {
+        if(src != v && conn[src][v].distance != INT_MAX && visited[v] == 0 && count >= 0)
+        {
+            count--;
+            return(q2_helper(v, dst, n, count, conn, visited));
+        }
+    }
+
+    // When you can't reach the destination
+    return 0;
+}
+
 // YOUR SOLUTIONS BELOW
 
 int q1(int n, const connection_t connections[n][n])
@@ -37,7 +62,10 @@ int q1(int n, const connection_t connections[n][n])
         for (int i = 0; i < n; i++)
         {
             if (visited[i] == 0)
+            {
+                free(visited);
                 return 0;
+            }
         }
     }
 
@@ -48,7 +76,21 @@ int q1(int n, const connection_t connections[n][n])
 int q2(const airport_t *src, const airport_t *dest, int n, int k,
        const connection_t connections[n][n])
 {
-    return 0;
+    // Check the destination from source directly
+    if (connections[src->num_id][dest->num_id].distance != INT_MAX)
+    {
+        k--;
+        if (k >= 0)
+            return 1;
+    }
+
+    int *visited = (int *) calloc(n, sizeof(int));
+    int res = 0;
+    
+    res = q2_helper(src->num_id, dest->num_id, n, k, connections, visited);
+    free(visited);
+
+    return res;
 }
 
 int q3(const airport_t *src, int n, const connection_t connections[n][n])
@@ -70,7 +112,39 @@ pair_t q5(int n, airport_t airports[n])
 
 int q6(int n, int amount, const int entry_fee[n])
 {
-    return 0;
+    /*
+        We are given a sorted array with, hence we can use
+        binary search to find whether the amount the traveller
+        has is in the list or not
+    */
+
+    // if the amount is less than the least entry fee, they can't go to any airport
+    if (amount < entry_fee[0])
+        return 0;
+    
+    // if the amount is more than the costliest fee, then can go to any airport
+    if (amount > entry_fee[n - 1])
+        return n;
+    
+    int start = 0;
+    int end = n - 1;
+    int mid = (start + end) / 2;
+    while (start <= end)
+    {
+        // The amount is in the middle of the search window
+        if (entry_fee[mid] == amount)
+            return mid + 1;
+        if (entry_fee[mid] < amount)
+            start = mid + 1;
+        else
+            end = mid - 1;
+        mid = (end + start) / 2;
+    }
+    
+    // The amount is in the middle of one of the entry fee pairs
+    if (entry_fee[mid] < amount)
+        return mid + 1;
+    return mid - 1;
 }
 
 void q7(int n, const char *pat, int contains[n], const airport_t airports[n])

@@ -5,6 +5,7 @@
 # @version 0.1
 
 SRN=PES1UG20CS111
+CC=gcc
 
 all: a.exe
 

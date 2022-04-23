@@ -94,21 +94,42 @@ int main()
     }
     {
         // Q2
-        airport_t src = {0, "BLR"};
-        airport_t dest = {1, "MUM"};
-        int n = 3;
-        int k = 2;
-        connection_t q2_t1_connections[3][3] = {
-            {{0, 0}, {INT_MAX, INT_MAX}, {1, 5}},
-            {{1, 2}, {0, 0}, {4, 3}},
-            {{2, 3}, {2, 3}, {0, 0}}};
-        if (q2(&src, &dest, n, k, q2_t1_connections))
         {
-            printf("Q2 TestCase 1: " PASSED);
+            airport_t src = {0, "BLR"};
+            airport_t dest = {1, "MUM"};
+            int n = 3;
+            int k = 2;
+            connection_t q2_t1_connections[3][3] = {
+                {{0, 0}, {INT_MAX, INT_MAX}, {1, 5}},
+                {{1, 2}, {0, 0}, {4, 3}},
+                {{2, 3}, {2, 3}, {0, 0}}};
+            if (q2(&src, &dest, n, k, q2_t1_connections))
+            {
+                printf("Q2 TestCase 1: " PASSED);
+            }
+            else
+            {
+                printf("Q2 TestCase 1: " FAILED);
+            }
         }
-        else
         {
-            printf("Q2 TestCase 1: " FAILED);
+            airport_t src = {0, "BLR"};
+            airport_t dest = {1, "MUM"};
+            int n = 4;
+            int k = 2;
+            connection_t q2_t1_connections[4][4] = {
+                {{0, 0}, {INT_MAX, INT_MAX}, {1, 5}, {INT_MAX, INT_MAX}},
+                {{1, 2}, {0, 0}, {4, 3}, {1, 4}},
+                {{INT_MAX, INT_MAX}, {INT_MAX, INT_MAX}, {0, 0}, {2, 3}},
+                {{1, 3}, {2, 4}, {INT_MAX, INT_MAX}, {0, 0}}};
+            if (!q2(&src, &dest, n, k, q2_t1_connections))
+            {
+                printf("Q2 TestCase 2: " PASSED);
+            }
+            else
+            {
+                printf("Q2 TestCase 2: " FAILED);
+            }
         }
     }
     {
