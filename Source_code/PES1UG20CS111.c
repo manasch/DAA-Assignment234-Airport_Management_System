@@ -1,6 +1,7 @@
 #include "header.h"
 #include <stdlib.h>
 #include <limits.h>
+#include <stdio.h>
 
 // ANY STATIC FUNCTIONS ARE UP HERE
 
@@ -15,15 +16,15 @@ static void q1_helper(int v, int n, int *visited, const connection_t (*conn)[n])
     }
 }
 
-static int q2_helper(const int src, const int dst, int n,
+static int q2_helper(const int src, const int dest, int n,
                      int count, const connection_t (*conn)[n], int *visited)
 {
     visited[src] = 1;
-    if (src == dst)
+    if (src == dest)
     {
         if (count >= 0)
             return 1;
-        // When you have reached the destination but took flights than required
+        // When you have reached the destination but took more flights than required
         return 0;
     }
 
@@ -32,12 +33,43 @@ static int q2_helper(const int src, const int dst, int n,
         if(src != v && conn[src][v].distance != INT_MAX && visited[v] == 0 && count >= 0)
         {
             count--;
-            return(q2_helper(v, dst, n, count, conn, visited));
+            int res = q2_helper(v, dest, n, count, conn, visited);
+            if (res)
+                return res;
+            
+            /*
+                Need to unmark this as the path failed
+                now it needs to check the next edge
+            */
+            visited[v] = 0;
+            count++;
         }
     }
 
     // When you can't reach the destination
     return 0;
+}
+
+static void q3_helper(const int src, const int dest, const int n, const connection_t (*conn)[n], int *visited, int count, int *res)
+{
+    visited[src] = 1;
+    if (src == dest && count != 0)
+    {
+        *res = 1;
+        return;
+    }
+    if (count == 0)
+        visited[dest] = 0;
+    
+    count++;
+    
+    for (int v = 0; v < n; v++)
+    {
+        if (src != v && conn[src][v].distance != INT_MAX && visited[v] == 0)
+        {
+            q3_helper(v, dest, n, conn, visited, count, res);
+        }
+    }
 }
 
 // YOUR SOLUTIONS BELOW
@@ -76,6 +108,9 @@ int q1(int n, const connection_t connections[n][n])
 int q2(const airport_t *src, const airport_t *dest, int n, int k,
        const connection_t connections[n][n])
 {
+    if (src->num_id == dest->num_id)
+        return 0;
+
     // Check the destination from source directly
     if (connections[src->num_id][dest->num_id].distance != INT_MAX)
     {
@@ -95,7 +130,20 @@ int q2(const airport_t *src, const airport_t *dest, int n, int k,
 
 int q3(const airport_t *src, int n, const connection_t connections[n][n])
 {
-    return 0;
+    /*
+        A DFS (or BFS) has to performed from for each edge node
+        from the src node and see if it can reach back, if it can
+        terminate the DFS and return 1, otherwise return 0
+    */
+
+    int *visited = (int *) calloc(n, sizeof(int));
+    int count = 0;
+    int res = 0;
+
+    q3_helper(src->num_id, src->num_id, n, connections, visited, count, &res);
+    free(visited);
+
+    return res;
 }
 
 void q4(int n, int (*predicate_func)(const airport_t *, const airport_t *),
