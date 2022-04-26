@@ -349,6 +349,23 @@ int main()
                 printf("Q7 TestCase 2: " FAILED);
             }
         }
+        {
+            int n = 3;
+            const char *pat = "PleAse";
+            int contains[3] = {0, 0, 0};
+            airport_t q7_t3_airports[] = {{0, "PleAseant"}, {1, "asljAjdfPleAsee"}, {2, "JDF"}};
+
+            q7(n, pat, contains, q7_t3_airports);
+
+            if (contains[0] == 1 && contains[1] == 1 && contains[2] == 0)
+            {
+                printf("Q7 TestCase 3: " PASSED);
+            }
+            else
+            {
+                printf("Q7 TestCase 3: " FAILED);
+            }
+        }
     }
     {
         // Q8
@@ -399,28 +416,55 @@ int main()
     }
     {
         // Q9
-        connection_t q9_t1_connections[4][4] = {
-            {{0, 0}, {1, 2}, {2, 6}, {INT_MAX, INT_MAX}},
-            {{1, 2}, {0, 0}, {3, 5}, {4, 1}},
-            {{2, 6}, {3, 5}, {0, 0}, {5, 7}},
-            {{INT_MAX, INT_MAX}, {4, 1}, {5, 7}, {0, 0}}};
+        {
+            connection_t q9_t1_connections[4][4] = {
+                {{0, 0}, {1, 2}, {2, 6}, {INT_MAX, INT_MAX}},
+                {{1, 2}, {0, 0}, {3, 5}, {4, 1}},
+                {{2, 6}, {3, 5}, {0, 0}, {5, 7}},
+                {{INT_MAX, INT_MAX}, {4, 1}, {5, 7}, {0, 0}}};
+
+            int n = 4;
+
+            pair_t edges[3] = {{-1, -1}, {-1, -1}, {-1, -1}};
+            int result = q9(n, edges, q9_t1_connections);
+            pair_t p1 = {0, 1};
+            pair_t p2 = {1, 2};
+            pair_t p3 = {1, 3};
+            if (result == 8 && (check_edge_perm(edges,&p1,&p2,&p3) || check_edge_perm(edges,&p1,&p3,&p2) ||
+                check_edge_perm(edges,&p2,&p1,&p3) || check_edge_perm(edges,&p2,&p3,&p1) || check_edge_perm(edges,&p3,&p1,&p2) ||
+                check_edge_perm(edges,&p3,&p2,&p1)))
+            {
+                printf("Q9 TestCase 1: " PASSED);
+            }
+            else
+            {
+                printf("Q9 TestCase 1: " FAILED);
+            }
+        }
+        {
+            connection_t q9_t2_connections[4][4] = {
+            {{0, 0}, {1, 5}, {2, 3}, {2, 2}},
+            {{1, 5}, {0, 0}, {3, 3}, {4, 7}},
+            {{2, 3}, {3, 3}, {0, 0}, {5, 8}},
+            {{2, 2}, {4, 7}, {5, 8}, {0, 0}}};
 
         int n = 4;
 
         pair_t edges[3] = {{-1, -1}, {-1, -1}, {-1, -1}};
-        int result = q9(n, edges, q9_t1_connections);
-		pair_t p1 = {0, 1};
-		pair_t p2 = {1, 2};
-		pair_t p3 = {1, 3};
+        int result = q9(n, edges, q9_t2_connections);
+		pair_t p1 = {0, 2};
+		pair_t p2 = {0, 3};
+		pair_t p3 = {1, 2};
         if (result == 8 && (check_edge_perm(edges,&p1,&p2,&p3) || check_edge_perm(edges,&p1,&p3,&p2) ||
             check_edge_perm(edges,&p2,&p1,&p3) || check_edge_perm(edges,&p2,&p3,&p1) || check_edge_perm(edges,&p3,&p1,&p2) ||
             check_edge_perm(edges,&p3,&p2,&p1)))
         {
-            printf("Q9 TestCase 1: " PASSED);
+            printf("Q9 TestCase 2: " PASSED);
         }
         else
         {
-            printf("Q9 TestCase 1: " FAILED);
+            printf("Q9 TestCase 2: " FAILED);
+        }
         }
     }
     {

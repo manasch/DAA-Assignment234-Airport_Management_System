@@ -11,3 +11,7 @@
 *.o
 *.exe
 *.out
+
+# Test files
+*test*
+*temp*

@@ -118,12 +118,12 @@ static void q4_helper_quicksort(int n, int low, int high, int (*predicate_func)(
     }
 }
 
-// static int str_len(const char *string)
-// {
-//     int len = 0;
-//     while(string[len] != '\0') len++;
-//     return len;
-// }
+static int str_len(const char *string)
+{
+    int len = 0;
+    while(string[len] != '\0') len++;
+    return len;
+}
 
 // static int longest_prefix(const char *string_1, int len_1, const char *string_2, int len_2)
 // {
@@ -139,6 +139,55 @@ static void q4_helper_quicksort(int n, int low, int high, int (*predicate_func)(
 // {
 
 // }
+
+static void create_shift_table(int *shift_table, const char *pat, int len, int table_length)
+{
+    for (int i = 0; i < table_length; i++)
+        shift_table[i] = len;
+    
+    for (int i = 0; i < len - 1; i++)
+        shift_table[(int) pat[i]] = len - i - 1;    
+}
+
+static int q7_helper_horspool(const char *pat, const char *text,
+                              int m, int n, int *shift_table)
+{
+    /*
+        Performing the regular horspool string matching with the help of a shift table
+        which tell how much to shift on a bad match
+    */
+    int i = m - 1;
+    int k;
+    while (i < n)
+    {
+        k = 0;
+        while (k < m && pat[m - 1 - k] == text[i - k])
+            k++;
+        
+        if (k == m)
+            return 1;
+        
+        i += shift_table[(int) text[i]];
+    }
+
+    return 0;
+}
+
+static int q9_find_minimum_edge_vertex(int *priority, int *inMST, int n)
+{
+    int minimum = INT_MAX;
+    int v;
+    for (int i = 0; i < n; i++)
+    {
+        if (inMST[i] == 0 && priority[i] < minimum)
+        {
+            v = i;
+            minimum = priority[i];
+        }
+    }
+
+    return v;
+}
 
 // YOUR SOLUTIONS BELOW
 
@@ -267,7 +316,20 @@ int q6(int n, int amount, const int entry_fee[n])
 
 void q7(int n, const char *pat, int contains[n], const airport_t airports[n])
 {
+    int pat_len = str_len(pat);
+    int airport_len = 0;
+    int *shift_table = (int *) malloc(256 * sizeof(int));
 
+    // Generating the shift table for Horspool's string matching
+    create_shift_table(shift_table, pat, pat_len, 256);
+
+    for (int i = 0; i < n; i++)
+    {
+        airport_len = str_len(airports[i].airport_name);
+        contains[i] = q7_helper_horspool(pat, airports[i].airport_name, pat_len, airport_len, shift_table);
+    }
+
+    free(shift_table);
 }
 
 int q8(int n, int trip_order[n - 1], const connection_t connections[n][n])
@@ -277,7 +339,54 @@ int q8(int n, int trip_order[n - 1], const connection_t connections[n][n])
 
 int q9(int n, pair_t edges[n - 1], const connection_t connections[n][n])
 {
-    return 0;
+    /*
+        To find the path which follows the constraints, we need to find
+        the minimum spanning tree, which can be done using prim's or kurskal's
+        algorithm, Implementation done using prim's algorithm
+    */
+
+    // To keep track of vertices in MST
+    int *inMST = (int *) calloc(n, sizeof(int));
+    int *parent = (int *) malloc(n * sizeof(int));
+    int *priority = (int *) malloc(n * sizeof(int));
+    int v;
+    int cost = 0;
+
+    // Initially none will have the priority
+    for (int i = 0; i < n; i++)
+        priority[i] = INT_MAX;
+    
+    // Assuming starting node is 0, hence it has no parent
+    parent[0] = -1;
+    priority[0] = 0;
+
+    // n vertices will have n - 1 edges
+    for (int i = 0; i < n - 1; i++)
+    {
+        v = q9_find_minimum_edge_vertex(priority, inMST, n);
+        inMST[v] = 1;
+
+        for (int j = 0; j < n; j++)
+        {
+            if(connections[v][j].time != INT_MAX && inMST[j] == 0 && connections[v][j].time < priority[j])
+            {
+                priority[j] = connections[v][j].time;
+                parent[j] = v;
+            }
+        }
+    }
+
+    for (int i = 0; i < n - 1; i++)
+    {
+        edges[i].first = parent[i + 1];
+        edges[i].second = i + 1;
+        cost += connections[edges[i].first][edges[i].second].time;
+    }
+
+    free(inMST);
+    free(parent);
+    free(priority);
+    return cost;
 }
 
 void q10(int n, int k, const airport_t *src,
