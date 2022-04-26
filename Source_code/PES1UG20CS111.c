@@ -125,20 +125,71 @@ static int str_len(const char *string)
     return len;
 }
 
-// static int longest_prefix(const char *string_1, int len_1, const char *string_2, int len_2)
-// {
-//     // Returns the smaller of the two strings
-//     int len = (len_1 - len_2) <= 0 ? len_1 : len_2;
+static int longest_prefix(const char *string_1, int len_1, const char *string_2, int len_2)
+{
+    // Returns the smaller of the two strings
+    int len = (len_1 - len_2) <= 0 ? len_1 : len_2;
 
-//     int index = 0;
-//     while (index != len - 1 && string_1[index] == string_2[index]) index++;
-//     return index;
-// }
+    int index = 0;
+    while (index <= len - 1 && string_1[index] == string_2[index]) index++;
+    return index;
+}
 
-// static int string_compare(const char *string_1, const char *string_2)
-// {
+static int string_compare(const char *string_1, int len_1, const char *string_2, int len_2)
+{
+    int len = (len_1 >= len_2) ? len_1 : len_2;
+    int i = 0;
+    int res = 0;
 
-// }
+    while (i < len && string_1[i] && string_2[i])
+    {
+        if (string_1[i] != string_2[i])
+        {
+            res = string_1[i] - string_2[i];
+            if (res > 0)
+                return 1;
+            return -1;
+        }
+        i++;
+    }
+    return 0;
+}
+
+static void q5_sort_string(int n, airport_t airports[n], int first, int last)
+{
+    int p, i, j;
+    airport_t temp;
+
+    if (first < last)
+    {
+        i = first;
+        j = last;
+        p = first;
+
+        while(i < j)
+        {
+            while(string_compare(airports[i].airport_name, str_len(airports[i].airport_name),
+                                 airports[p].airport_name, str_len(airports[p].airport_name)) == -1  && i < last)
+                i++;
+            
+            while(string_compare(airports[i].airport_name, str_len(airports[i].airport_name),
+                                 airports[p].airport_name, str_len(airports[p].airport_name)) == 1 && j > first)
+                j--;
+            
+            if(i < j)
+            {
+                temp = airports[i];
+                airports[i] = airports[j];
+                airports[j] = temp;
+            }
+        }
+        temp = airports[p];
+        airports[p] = airports[j];
+        airports[j] = temp; 
+        q5_sort_string(n, airports, first, j - 1);
+        q5_sort_string(n, airports, j + 1, last);
+    }
+}
 
 static void create_shift_table(int *shift_table, const char *pat, int len, int table_length)
 {
@@ -312,6 +363,22 @@ void q4(int n, int (*predicate_func)(const airport_t *, const airport_t *),
 pair_t q5(int n, airport_t airports[n])
 {
     pair_t ans = {-1, -1};
+    int k = 0;
+    int count;
+    q5_sort_string(n, airports, 0, n - 1);
+    
+    for (int i = 0; i < n - 1; i++)
+    {
+        count = longest_prefix(airports[i].airport_name, str_len(airports[i].airport_name),
+                               airports[i + 1].airport_name, str_len(airports[i + 1].airport_name));
+        printf("%d", count);
+        if (count > k)
+        {
+            ans.first = airports[i].num_id;
+            ans.second = airports[i].num_id;
+        }
+    }
+
     return ans;
 }
 
