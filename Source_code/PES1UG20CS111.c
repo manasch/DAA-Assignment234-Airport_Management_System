@@ -1,7 +1,6 @@
 #include "header.h"
 #include <stdlib.h>
 #include <limits.h>
-#include <stdio.h>
 
 // ANY STATIC FUNCTIONS ARE UP HERE
 
@@ -125,57 +124,65 @@ static int str_len(const char *string)
     return len;
 }
 
-static int longest_prefix(const char *string_1, int len_1, const char *string_2, int len_2)
+static int max(int a, int b)
 {
-    // Returns the smaller of the two strings
-    int len = (len_1 - len_2) <= 0 ? len_1 : len_2;
+    return (a >= b) ? a : b;
+}
 
+static int min(int a, int b)
+{
+    return (a < b) ? a : b;
+}
+
+static int longest_prefix_match(const char *string_1, const char *string_2, int length)
+{
     int index = 0;
-    while (index <= len - 1 && string_1[index] == string_2[index]) index++;
+    while (index <= length - 1 && string_1[index] == string_2[index]) index++;
     return index;
 }
 
-static int string_compare(const char *string_1, int len_1, const char *string_2, int len_2)
+static int string_compare(const char *string_1, const char *string_2, int len_1, int len_2)
 {
-    int len = (len_1 >= len_2) ? len_1 : len_2;
+    // Compares between the 2 strings and returns which is greater
+    int length = max(len_1, len_2);
     int i = 0;
     int res = 0;
-
-    while (i < len && string_1[i] && string_2[i])
+    char s1, s2;
+    while(i < length && string_1[i] && string_2[i])
     {
-        if (string_1[i] != string_2[i])
+        s1 = string_1[i];
+        s2 = string_2[i++];
+        
+        if(s1 != s2)
         {
-            res = string_1[i] - string_2[i];
-            if (res > 0)
+            res = s1 - s2;
+            if(res > 0)
                 return 1;
             return -1;
         }
-        i++;
     }
     return 0;
 }
 
-static void q5_sort_string(int n, airport_t airports[n], int first, int last)
+static void q5_string_sort(int n, airport_t airports[n], int start, int end)
 {
-    int p, i, j;
+    // Similar to the in-place quick sort for q4, this performs a quicksort for the given set of cities
+    int pivot, i, j;
     airport_t temp;
-
-    if (first < last)
+    if(start < end)
     {
-        i = first;
-        j = last;
-        p = first;
-
+        i = start;
+        j = end;
+        pivot = start;
         while(i < j)
         {
-            while(string_compare(airports[i].airport_name, str_len(airports[i].airport_name),
-                                 airports[p].airport_name, str_len(airports[p].airport_name)) == -1  && i < last)
+            while(string_compare(airports[i].airport_name, airports[pivot].airport_name, str_len(airports[i].airport_name), 
+                str_len(airports[pivot].airport_name)) == -1  && i < end)
                 i++;
             
-            while(string_compare(airports[i].airport_name, str_len(airports[i].airport_name),
-                                 airports[p].airport_name, str_len(airports[p].airport_name)) == 1 && j > first)
+            while(string_compare(airports[j].airport_name, airports[pivot].airport_name, str_len(airports[j].airport_name), 
+                str_len(airports[pivot].airport_name)) == 1  && j > start)                
                 j--;
-            
             if(i < j)
             {
                 temp = airports[i];
@@ -183,11 +190,11 @@ static void q5_sort_string(int n, airport_t airports[n], int first, int last)
                 airports[j] = temp;
             }
         }
-        temp = airports[p];
-        airports[p] = airports[j];
+        temp = airports[pivot];
+        airports[pivot] = airports[j];
         airports[j] = temp; 
-        q5_sort_string(n, airports, first, j - 1);
-        q5_sort_string(n, airports, j + 1, last);
+        q5_string_sort(n, airports, start, j - 1);
+        q5_string_sort(n, airports, j + 1, end);
     }
 }
 
@@ -222,6 +229,60 @@ static int q7_helper_horspool(const char *pat, const char *text,
     }
 
     return 0;
+}
+
+static int q8_count_in_list(int n, int selected[n])
+{
+    int count = 0;
+    for(int i = 0; i < n; i++)
+    {
+        if(selected[i] == 1)
+            count++;
+    }
+    return count;
+}
+
+static void q8_helper_1(int n, int trip_order[n - 1], int temp[n - 1], const connection_t connections[n][n],
+                        int selected[n], int src, int temp_src, int index, int *min, int *cost)
+{
+    int i;
+    int value;
+    selected[src] = 1;
+
+    for(i = 0; i < n; i++)
+    {
+        if(q8_count_in_list(n, selected) == n - 1)
+        {
+            int extra = connections[src][temp_src].distance;
+            if(extra != INT_MAX)
+            {
+                temp[index] = src;
+                *cost += extra;
+                
+                if(*cost <= *min)
+                {
+                    *min = *cost;
+                    for(int j = 0; j < n - 1; j++)
+                        trip_order[j] = temp[j];
+                }
+            }
+            else
+                extra = 0;
+
+            *cost -= extra;
+            i = n;
+        }
+        else if(connections[src][i].distance != 0 && connections[src][i].distance != INT_MAX && selected[i] == 0) 
+        {
+            value = connections[src][i].distance;
+            temp[index++] = src;    
+            *cost += value;     
+            q8_helper_1(n, trip_order, temp, connections, selected, i, temp_src, index, min, cost);
+            *cost -= value;
+            index--;
+        }
+    }
+    selected[src] = 0;
 }
 
 static int q9_find_minimum_edge_vertex(int *priority, int *inMST, int n)
@@ -362,23 +423,26 @@ void q4(int n, int (*predicate_func)(const airport_t *, const airport_t *),
 
 pair_t q5(int n, airport_t airports[n])
 {
+    /*
+        By performing a quick sort, we get a list with
+        sorted cities, hence performing adjacent comparisions,
+        which will provide the longest common prefix
+    */
     pair_t ans = {-1, -1};
-    int k = 0;
+    int max = 0;
     int count;
-    q5_sort_string(n, airports, 0, n - 1);
-    
-    for (int i = 0; i < n - 1; i++)
+    q5_string_sort(n, airports, 0, n - 1);
+    for(int i = 0; i < n - 1; i++)
     {
-        count = longest_prefix(airports[i].airport_name, str_len(airports[i].airport_name),
-                               airports[i + 1].airport_name, str_len(airports[i + 1].airport_name));
-        printf("%d", count);
-        if (count > k)
+        count = longest_prefix_match(airports[i].airport_name, airports[i + 1].airport_name, 
+                min(str_len(airports[i].airport_name), str_len(airports[i + 1].airport_name)));
+        
+        if(count > max)
         {
             ans.first = airports[i].num_id;
-            ans.second = airports[i].num_id;
+            ans.second = airports[i + 1].num_id;
         }
     }
-
     return ans;
 }
 
@@ -439,7 +503,32 @@ void q7(int n, const char *pat, int contains[n], const airport_t airports[n])
 
 int q8(int n, int trip_order[n - 1], const connection_t connections[n][n])
 {
-    return 0;
+    int in_list[n];
+    int lowest = INT_MAX;
+    int min = INT_MAX;
+    int i, j;
+    int index = 0, cost = 0;
+    int temp[n - 1];
+
+    for (i = 0; i < n; i++)
+    {
+        for (j = 0; j < n; j++)
+            in_list[j] = 0;
+
+        q8_helper_1(n, trip_order, temp, connections, in_list, i,
+                    i, index, &min, &cost);
+
+        if(min < lowest)
+            lowest = min;
+        cost = 0;
+    }  
+    if (min == INT_MAX)
+    {
+        lowest = -1;
+        for(i = 0; i < n - 1; i++)
+            trip_order[i] = -1;
+    }
+    return lowest;
 }
 
 int q9(int n, pair_t edges[n - 1], const connection_t connections[n][n])
