@@ -189,6 +189,46 @@ static int q9_find_minimum_edge_vertex(int *priority, int *inMST, int n)
     return v;
 }
 
+static void q10_helper_update_value(const int src, int *value, int *visited,
+                                    int n, const connection_t (*conn)[n], const int cost)
+{
+    int temp = 0;
+    for (int i = 0; i < n; i++)
+    {
+        // Replace the value with the least of the sum or the initial value
+        if (src != i && conn[src][i].time != INT_MAX && visited[i] == 0)
+        {
+            temp = conn[src][i].time;
+            value[i] = ((value[i] - (cost + temp) > 0) ? (cost + temp) : value[i]);
+        }
+    }
+}
+
+static void q10_dijkstra_path(int n, const connection_t (*conn)[n], const int source,
+                              int *value, int *visited)
+{
+    int cost = 0;
+    int minimum;
+    int flag = source;
+
+    for (int i = 0; i < n - 1; i++)
+    {
+        minimum = INT_MAX;
+        q10_helper_update_value(flag, value, visited, n, conn, cost);
+
+        for (int i = 0; i < n; i++)
+        {
+            if (i != source && minimum > value[i] && visited[i] == 0)
+            {
+                minimum = value[i];
+                flag = i;
+            }
+        }
+        visited[flag] = 1;
+        cost += minimum;
+    }
+}
+
 // YOUR SOLUTIONS BELOW
 
 int q1(int n, const connection_t connections[n][n])
@@ -271,8 +311,6 @@ void q4(int n, int (*predicate_func)(const airport_t *, const airport_t *),
 
 pair_t q5(int n, airport_t airports[n])
 {
-    // int res = longest_prefix(airports[0].airport_name, airports[1].airport_name);
-    // printf("%d\n", res);
     pair_t ans = {-1, -1};
     return ans;
 }
@@ -393,7 +431,32 @@ void q10(int n, int k, const airport_t *src,
          const connection_t connections[n][n], const int destinations[k],
          int costs[k])
 {
+    /*
+        Dijkstra's algorithm will be able to return the shortest path
+        from the source to the destination, which is implemented here
+    */
 
+    int *value = (int *) malloc(n * sizeof(int));
+    int *visited = (int *) malloc(n * sizeof(int));
+
+    // Initially all the values will be infinity from the starting edge
+    for (int i = 0; i < n; i++)
+    {
+        value[i] = INT_MAX;
+        visited[i] = 0;
+    }
+    
+    // Taking the value of source in the array to be 0, as the cost starts from here
+    value[src->num_id] = 0;
+    visited[src->num_id] = 1;
+
+    q10_dijkstra_path(n, connections, src->num_id, value, visited);
+
+    for (int i = 0; i < k; i++)
+        costs[i] = value[destinations[i]];
+    
+    free(value);
+    free(visited);
 }
 
 // END

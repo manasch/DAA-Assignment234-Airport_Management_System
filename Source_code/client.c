@@ -469,27 +469,77 @@ int main()
     }
     {
         // Q10
-        connection_t q10_t1_connections[4][4] = {
-            {{0, 0}, {1, 2}, {2, 6}, {INT_MAX, INT_MAX}},
-            {{1, 2}, {0, 0}, {3, 5}, {4, 1}},
-            {{2, 6}, {3, 5}, {0, 0}, {5, 7}},
-            {{INT_MAX, INT_MAX}, {4, 1}, {5, 7}, {0, 0}}};
-
-        int n = 4;
-        int k = 2;
-        int destinations[] = {0, 2};
-        int costs[2] = {INT_MAX, INT_MAX};
-
-        airport_t src = {3, "BLR"};
-        q10(n, k, &src, q10_t1_connections, destinations, costs);
-
-        if (costs[0] == 3 && costs[1] == 6)
         {
-            printf("Q10 TestCase 1: " PASSED);
+            connection_t q10_t1_connections[4][4] = {
+                {{0, 0}, {1, 2}, {2, 6}, {INT_MAX, INT_MAX}},
+                {{1, 2}, {0, 0}, {3, 5}, {4, 1}},
+                {{2, 6}, {3, 5}, {0, 0}, {5, 7}},
+                {{INT_MAX, INT_MAX}, {4, 1}, {5, 7}, {0, 0}}};
+
+            int n = 4;
+            int k = 2;
+            int destinations[] = {0, 2};
+            int costs[2] = {INT_MAX, INT_MAX};
+
+            airport_t src = {3, "BLR"};
+            q10(n, k, &src, q10_t1_connections, destinations, costs);
+
+            if (costs[0] == 3 && costs[1] == 6)
+            {
+                printf("Q10 TestCase 1: " PASSED);
+            }
+            else
+            {
+                printf("Q10 TestCase 1: " FAILED);
+            }
         }
-        else
         {
-            printf("Q10 TestCase 1: " FAILED);
+            connection_t q10_t2_connections[4][4] = {
+                {{0, 0}, {1, 2}, {2, 6}, {INT_MAX, INT_MAX}},
+                {{1, 2}, {0, 0}, {3, 5}, {4, 1}},
+                {{2, 6}, {3, 5}, {0, 0}, {5, 7}},
+                {{INT_MAX, INT_MAX}, {4, 1}, {5, 7}, {0, 0}}};
+
+            int n = 4;
+            int k = 3;
+            int destinations[] = {1, 2, 3};
+            int costs[3] = {INT_MAX, INT_MAX, INT_MAX};
+
+            airport_t src = {0, "BLR"};
+            q10(n, k, &src, q10_t2_connections, destinations, costs);
+
+            if (costs[0] == 2 && costs[1] == 6 && costs[2] == 3)
+            {
+                printf("Q10 TestCase 2: " PASSED);
+            }
+            else
+            {
+                printf("Q10 TestCase 2: " FAILED);
+            }
+        }
+        {
+            connection_t q10_t3_connections[4][4] = {
+                {{0, 0}, {1, 5}, {2, 3}, {2, 2}},
+                {{1, 5}, {0, 0}, {3, 3}, {4, 7}},
+                {{2, 3}, {3, 3}, {0, 0}, {5, 8}},
+                {{2, 2}, {4, 7}, {5, 8}, {0, 0}}};
+
+            int n = 4;
+            int k = 2;
+            int destinations[] = {0, 1};
+            int costs[2] = {INT_MAX, INT_MAX};
+
+            airport_t src = {3, "BLR"};
+            q10(n, k, &src, q10_t3_connections, destinations, costs);
+
+            if (costs[0] == 2 && costs[1] == 7)
+            {
+                printf("Q10 TestCase 3: " PASSED);
+            }
+            else
+            {
+                printf("Q10 TestCase 3: " FAILED);
+            }
         }
     }
     return 0;
