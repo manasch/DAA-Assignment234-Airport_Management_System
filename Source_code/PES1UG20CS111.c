@@ -72,6 +72,74 @@ static void q3_helper(const int src, const int dest, const int n, const connecti
     }
 }
 
+static void swap(airport_t *x, airport_t *y)
+{
+    airport_t temp = *x;
+    *x = *y;
+    *y = temp;
+}
+
+static int q4_partition(int n, int low, int high, int (*predicate_func)(const airport_t *, const airport_t *),
+                        airport_t airport_list[n])
+{
+    int pivot = low;
+    int left_pointer = low;
+    int right_pointer = high + 1;
+
+    do
+    {
+        do
+        {
+            left_pointer++;
+        } while (left_pointer < high && predicate_func(&airport_list[left_pointer], &airport_list[pivot]));
+
+        do
+        {
+            right_pointer--;
+        } while (right_pointer > low && predicate_func(&airport_list[pivot], &airport_list[right_pointer]));
+
+        if (left_pointer < right_pointer)
+            swap(&airport_list[left_pointer], &airport_list[right_pointer]);
+    } while (left_pointer < right_pointer);
+
+    swap(&airport_list[pivot], &airport_list[right_pointer]);
+    return right_pointer;
+}
+
+static void q4_helper_quicksort(int n, int low, int high, int (*predicate_func)(const airport_t *, const airport_t *),
+                                airport_t airport_list[n])
+{
+    int p;
+    if (low < high)
+    {
+        p = q4_partition(n, low, high, predicate_func, airport_list);
+        q4_helper_quicksort(n, low, p - 1, predicate_func, airport_list);
+        q4_helper_quicksort(n, p + 1, high, predicate_func, airport_list);
+    }
+}
+
+// static int str_len(const char *string)
+// {
+//     int len = 0;
+//     while(string[len] != '\0') len++;
+//     return len;
+// }
+
+// static int longest_prefix(const char *string_1, int len_1, const char *string_2, int len_2)
+// {
+//     // Returns the smaller of the two strings
+//     int len = (len_1 - len_2) <= 0 ? len_1 : len_2;
+
+//     int index = 0;
+//     while (index != len - 1 && string_1[index] == string_2[index]) index++;
+//     return index;
+// }
+
+// static int string_compare(const char *string_1, const char *string_2)
+// {
+
+// }
+
 // YOUR SOLUTIONS BELOW
 
 int q1(int n, const connection_t connections[n][n])
@@ -149,11 +217,13 @@ int q3(const airport_t *src, int n, const connection_t connections[n][n])
 void q4(int n, int (*predicate_func)(const airport_t *, const airport_t *),
         airport_t airport_list[n])
 {
-
+    q4_helper_quicksort(n, 0, n - 1, predicate_func, airport_list);
 }
 
 pair_t q5(int n, airport_t airports[n])
 {
+    // int res = longest_prefix(airports[0].airport_name, airports[1].airport_name);
+    // printf("%d\n", res);
     pair_t ans = {-1, -1};
     return ans;
 }
